@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电影推荐系统</title>
+    <style>
+        @font-face {
+            font-family: 'CustomFont';
+            src: url('static/font/No.228-ShangShouGuangZheTi-2.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* 设置窗口不拖动 */
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0 0 0 0;
+            overflow: hidden hidden;
+        }
+
+        body {
+            font-family: 'CustomFont', sans-serif;
+            /* background-image: url('static/images/bg4.jpg'); */
+            background-color: #2c2c2c;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            color: #333;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        main {
+            flex-grow: 1;
+        }
+
+        .sidebar {
+            width: 20%;
+            background-color: #1e1e1e;
+            padding: 0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar h1 {
+            margin-bottom: auto;
+            margin-top: 180px;
+        }
+
+        .main-content {
+            width: 75%;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-left: auto;
+            margin-right: auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        h1 {
+            text-align: center;
+            background: linear-gradient(to right, #4b7b4d, #c2c4c2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'FangSong_GB2312', cursive;
+        }
+
+        form {
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            text-align: center;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ffefef;
+            border-radius: 4px;
+            box-sizing: border-box;
+            text-align: center;
+            font-family: 'CustomFont';
+        }
+
+        button {
+            background: linear-gradient(to right, #4b7b4d, #3c433c);
+            color: #ffffff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            text-align: center;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            font-family: 'LiSu';
+        }
+
+        button:hover {
+            background-color: #ffffff30;
+        }
+
+        button:active {
+            transform: scale(0.98);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.15), 0 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        button.clicked {
+            background-color: #ffffff30;
+        }
+
+
+        .navbar button {
+            background-color: #555;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            cursor: pointer;
+            margin: 10px 5px;
+            margin-top: 70px;
+            font-size: 25px;
+            transition: color 0.3s;
+            /* 添加过渡效果 */
+        }
+
+        .navbar button:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .navbar button.clicked {
+            color: #000000;
+            /* 点击时字体颜色变为黑色 */
+        }
+
+        #rating-result,
+        #user-based-rating-result,
+        #item-based-rating-result {
+            margin-top: 5px;
+            font-size: 20px;
+            color: #5b5b5b;
+            text-align: center;
+            display: inline;
+        }
+
+        #predictionType {
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 16px;
+            font-family: 'CustomFont', sans-serif;
+            color: #4e4e4e;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        li {
+            background-color: #f9f9f9;
+            margin-bottom: 5px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .output {
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            color: #4e4e4e;
+        }
+
+        .button1 {
+            display: flex;
+            background-color: rgba(255, 255, 255, 0.5);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .navbar {
+            display: flex;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .navbar button {
+            background-color: #555;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            cursor: pointer;
+            margin: 10px 5px;
+            margin-top: 70px;
+            font-size: 25px;
+        }
+
+        .navbar button:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .contain1 {
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .predictTypeText {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 5px;
+            text-align: center;
+            color: #333;
+        }
+
+        .pridictButton {
+            background: linear-gradient(to right, #4b7b4d, #3c433c);
+            color: #ffffff;
+            padding: 10px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            box-shadow: 0 0 10px rgb(76 73 73 / 80%), 0 0 20px rgb(239 242 240 / 60%), 0 0 30px rgb(26 26 26 / 40%);
+            flex-grow: 1;
+        }
+
+        .pridictButton:hover {
+            background-color: #357ab8;
+        }
+
+        .pridictButton:active {
+            transform: scale(0.98);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.15), 0 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .inline-container {
+            display: flex;
+            margin-top: 10px;
+            flex-direction: row;
+            align-items: baseline;
+        }
+
+        #rating-result-container {
+            margin-left: 30px;
+            padding: 8px 480px 8px 200px;
+            background-color: rgb(255 255 255 / 50%);
+            display: block;
+        }
+
+        .buttonContainer {
+            display: flex;
+        }
+
+        .recommendButton {
+            all: unset;
+            background: rgb(3 3 3 / 38%);
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-size: 25px;
+            text-align: center;
+            display: block;
+            flex-grow: 1;
+            margin: 0;
+            border-radius: 0;
+            padding: 10px 10px 10px 10px;
+            transition: background-color 0.3s;
+        }
+
+        .recommendButton.clicked {
+            background-color: #f1f1f18f;
+            ;
+            /* 点击后保持的背景颜色 */
+        }
+
+        .recommendNum {
+            all: unset;
+            width: 70%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ffefef;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: 'CustomFont';
+            display: flex;
+            background-color: #ffffff;
+            text-align: left;
+        }
+
+        .recommendation-form {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .recommendCotainer {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .recommendtButton {
+            background: linear-gradient(to right, #4b7b4d, #3c433c);
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            box-shadow: 0 0 10px rgb(76 73 73 / 80%), 0 0 20px rgb(239 242 240 / 60%), 0 0 30px rgb(26 26 26 / 40%);
+            flex-grow: 1;
+            margin-left: 30px;
+        }
+
+        .numLabel {
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 左边固定导航栏 -->
+    <div class="sidebar">
+        <h1>电影推荐系统</h1>
+        <div class="navbar">
+            <button id="ratingFormButton">评分预测</button>
+            <button id="recommendationsButton">电影推荐</button>
+        </div>
+    </div>
+
+    <!-- 右边主要内容区域 -->
+    <div class="main-content">
+        <!-- 评分预测表单 -->
+        <div id="ratingFormContainer" style="display: none;">
+            <form id="ratingForm" method="post">
+                <label for="user">用户ID</label>
+                <input type="text" id="user" name="user" required>
+
+                <label for="item">物品ID</label>
+                <input type="text" id="item" name="item" required>
+
+                <label for="predictionType" class="predictTypeText">预测类型</label>
+                <select id="predictionType" name="predictionType">
+                    <option value="user_based">基于用户的评分</option>
+                    <option value="item_based">基于物品的评分</option>
+                </select>
+
+                <div class="inline-container">
+                    <button type="submit" class="pridictButton" id="predict-rating-button">预测评分</button>
+                    <div id="rating-result-container" style="display: block;">
+                        <p id="rating-result"><span></span></p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- 电影推荐部分 -->
+        <div id="recommendationsSection" style="display: none;" class="buttonContainer">
+            <div>
+                <div class="button1">
+                    <button id="contentRecommendationsButton" class="recommendButton">基于内容推荐</button>
+                    <button id="userRecommendationsButton" class="recommendButton">基于用户ID推荐</button>
+                </div>
+            </div>
+            <!-- 基于内容推荐 -->
+            <div id="contentRecommendationsContainer" style="display: none;">
+                <form id="recommendations-form">
+                    <label for="movie-title">电影名称</label>
+                    <input type="text" id="movie-title" required>
+                    <label for="top-n" class="numLabel">推荐数量</label>
+                    <div class="recommendCotainer">
+                        <input type="number" id="top-n" value="5" required class="recommendNum">
+                        <button type="submit" class="recommendtButton">推荐电影</button>
+                    </div>
+                    <ul id="recommendations-list" class="output"></ul>
+                </form>
+
+            </div>
+
+            <!-- 用户ID推荐电影 -->
+            <div id="userRecommendationsContainer" style="display: none;">
+                <form id="user-recommendations-form">
+                    <label for="user-id-recommendations">用户ID<label>
+                            <input type="number" id="user-id-recommendations" required>
+                            <label for="top-n-recommendations" class="numLabel">推荐数量</label>
+                            <div class="recommendCotainer">
+                                <input type="number" id="top-n-recommendations" value="5" required class="recommendNum">
+                                <button type="submit" class="recommendtButton">推荐电影</button>
+                            </div>
+                            <ul id="user-recommendations-list" class="output"></ul>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 显示评分预测表单
+        document.getElementById('ratingFormButton').addEventListener('click', function () {
+            document.getElementById('ratingFormContainer').style.display = 'block';
+            document.getElementById('recommendationsSection').style.display = 'none';
+            // 清除所有 navbar 按钮的点击颜色
+            var navbarButtons = document.querySelectorAll('.navbar button');
+            navbarButtons.forEach(function (button) {
+                button.classList.remove('clicked');
+            });
+            // 为“评分预测”按钮添加 'clicked' 类
+            this.classList.add('clicked');
+        });
+
+        // 电影推荐按钮点击事件
+        document.getElementById('recommendationsButton').addEventListener('click', function () {
+            document.getElementById('ratingFormContainer').style.display = 'none';
+            document.getElementById('recommendationsSection').style.display = 'block';
+            document.getElementById('contentRecommendationsContainer').style.display = 'block';
+            document.getElementById('userRecommendationsContainer').style.display = 'none';
+            // 清除所有 navbar 按钮的点击颜色
+            var navbarButtons = document.querySelectorAll('.navbar button');
+            navbarButtons.forEach(function (button) {
+                button.classList.remove('clicked');
+            });
+            // 为“电影推荐”按钮添加 'clicked' 类
+            this.classList.add('clicked');
+
+            // 默认选择“基于内容推荐”按钮
+            document.getElementById('contentRecommendationsButton').classList.add('clicked');
+            document.getElementById('userRecommendationsButton').classList.remove('clicked');
+        });
+
+        // 基于内容推荐的按钮点击事件
+        document.getElementById('contentRecommendationsButton').addEventListener('click', function () {
+            this.classList.add('clicked');
+            document.getElementById('userRecommendationsButton').classList.remove('clicked');
+            document.getElementById('contentRecommendationsContainer').style.display = 'block';
+            document.getElementById('userRecommendationsContainer').style.display = 'none';
+        });
+
+        // 基于用户ID推荐的按钮点击事件
+        document.getElementById('userRecommendationsButton').addEventListener('click', function () {
+            this.classList.add('clicked');
+            document.getElementById('contentRecommendationsButton').classList.remove('clicked');
+            document.getElementById('contentRecommendationsContainer').style.display = 'none';
+            document.getElementById('userRecommendationsContainer').style.display = 'block';
+        });
+
+        // 预测评分按钮点击事件
+        document.getElementById('predict-rating-button').addEventListener('click', function () {
+            document.getElementById('rating-result-container').style.display = 'block';
+        });
+
+        // 评分预测表单提交事件
+        document.getElementById('ratingForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const userId = document.getElementById('user').value;
+            const movieId = document.getElementById('item').value;
+            const predictionType = document.getElementById('predictionType').value;
+            let endpoint;
+            if (predictionType === 'user_based') {
+                endpoint = '/predict_user_based_rating';
+            } else if (predictionType === 'item_based') {
+                endpoint = '/predict_item_based_rating';
+            }
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: parseInt(userId), movie_id: parseInt(movieId) })
+                });
+                const data = await response.json();
+                // 更新显示预测评分的区域
+                document.querySelector('#rating-result span').innerText = data.predicted_rating;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // 内容推荐表单提交事件
+        document.getElementById('recommendations-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const title = document.getElementById('movie-title').value;
+            const topN = document.getElementById('top-n').value;
+            const response = await fetch('/content_recommendations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title, top_n: parseInt(topN) })
+            });
+            const data = await response.json();
+            const recommendationsList = document.getElementById('recommendations-list');
+            recommendationsList.innerHTML = '';
+            data.recommendations.forEach(movie => {
+                const li = document.createElement('li');
+                li.innerText = movie;
+                recommendationsList.appendChild(li);
+            });
+        });
+
+        // 用户ID推荐电影表单提交事件
+        document.getElementById('user-recommendations-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const userId = document.getElementById('user-id-recommendations').value;
+            const topN = document.getElementById('top-n-recommendations').value;
+            try {
+                const response = await fetch('/get_item_based_recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: parseInt(userId), top_n: parseInt(topN) })
+                });
+                const data = await response.json();
+                console.log(data); // 打印响应数据到控制台
+                const recommendationsList = document.getElementById('user-recommendations-list');
+                recommendationsList.innerHTML = '';
+                data.recommendations.forEach(movie => {
+                    const li = document.createElement('li');
+                    li.innerText = movie.Title;
+                    recommendationsList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>
